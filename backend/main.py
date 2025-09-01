@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 #from routes.timebooking_routes import router as timebooking_router
-#from models.timebooking import Base as TimebookingBase
+from backend.routes.timebooking_routes import router as timebooking_router
+from .models.timebooking import Base as TimebookingBase
 from backend.config.database import engine
 from fastapi.staticfiles import StaticFiles
 import sys
@@ -11,7 +12,7 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Create tables
-#TimebookingBase.metadata.create_all(bind=engine)
+TimebookingBase.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Timebooking", version="1.0.0")
 
@@ -25,7 +26,7 @@ app.add_middleware(
 )
 
 # Include routers
-#app.include_router(timebooking_router)
+app.include_router(timebooking_router)
 
 @app.get("/")
 async def root():

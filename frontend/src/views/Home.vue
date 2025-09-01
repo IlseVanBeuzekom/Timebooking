@@ -29,6 +29,7 @@
 
 <script>
 import { ref } from 'vue'
+import { useTimeBookingApi } from '@/composables/useTimebookingApi';
 
 export default {
     name: 'Home',
@@ -44,12 +45,14 @@ export default {
         const startTijd = ref(new Date());
         const durationInSeconds = ref(0);
 
-        const startActiviteit = () => {
+        const { addTimebooking }= useTimeBookingApi();
+
+        const startActiviteit = async () => {
             endPreviousActivity();
             startNewActivity();            
         }
 
-        const endPreviousActivity = () => {
+        const endPreviousActivity = async () => {
             if (projectNaamStarted.value){
                 const startTijdPrevious = startTijd.value;
                 const endTijdPrevious = new Date();
@@ -57,16 +60,19 @@ export default {
 
                 const {hours, minutes, seconds} = convertDurationToHoursMinutesSeconds(durationInMilliSecondsPrevious);
                 
-                const activityEntry = [ projectNaamStarted.value
-                                      , ticketNummerStarted.value
-                                      , beschrijvingStarted.value
-                                      , startTijdPrevious
-                                      , endTijdPrevious
-                                      , hours + ' uur, ' + minutes + ' minuten, ' + seconds + ' seconden'
-                ]
+                const activityEntry = { 
+                                        project_naam: projectNaamStarted.value
+                                      , ticket_nummer: ticketNummerStarted.value
+                                      , beschrijving: beschrijvingStarted.value
+                                      , date: startTijdPrevious.toISOString().split('T')[0]
+                                      , start_tijd: startTijdPrevious
+                                      , eind_tijd: endTijdPrevious
+                                      , duratie: durationInMilliSecondsPrevious / 1000
+                }
                 console.log(activityEntry);
 
                 // Make here the call to the backend to save the activityEntry
+                await addTimebooking(activityEntry)
             }
             
         }
